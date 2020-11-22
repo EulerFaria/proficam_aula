@@ -1,0 +1,3 @@
+- seus jupyter notebooks podem ser armazenados aqui
+- Armazene apenas código e arquivos auxiliares que não contenham informações sensíveis. 
+- não comite:dados (.csv, .xlsx), modelos (.pkl, .joblib, .hdf5) no repositório
