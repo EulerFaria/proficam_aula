@@ -1,0 +1,14 @@
+name: proficam
+channels:
+  - anaconda
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.7.3
+  - pandas=1.0.3
+  - pyodbc==4.0.30
+  #- pip:
+  #  -xgboost==1.2.1
+
+  
+
