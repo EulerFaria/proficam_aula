@@ -1,7 +1,11 @@
 import pyodbc
+import time
 import pandas as pd
 import os
-import time
+from logger import get_logger
+
+# Logger
+logger = get_logger(__name__)
 
 def get_cnx_str(cnx_name='CNX_STR_PROFICAM'):
     """Essa função é responsável por obter a chave de conexão cnx_name armazenada como variável de ambiente
@@ -17,10 +21,15 @@ def get_cnx_str(cnx_name='CNX_STR_PROFICAM'):
         Chave de conexão ODBC contendo DRIVER, SERVER, UID, PWD.
         ex: 'DRIVER={ODBC Driver 17 for SQL Server}; SERVER=xxx; DATABASE=xxx; UID=xxx; PWD=xxx'
     """
-    cnx_str = os.environ.get(cnx_name)
-    return cnx_str
-
-def get_odbc_connection(cnx_str,attempts=5,time_sleep=10):
+    try:
+        cnx_str = os.environ.get('CNX_STR_PROFICAM')
+        logger.info(f"Chave de conexão {cnx_name} capturada com sucesso")
+        logger.debug(f"***{cnx_str}")
+        return cnx_str
+    except Exception as e:
+        logger.critical(f'Não foi possível obter a chave de conexão {cnx_name}',exc_info=True)
+    
+def get_odbc_connection(cnx_str,attempts=6,time_sleep=30):
     """Esta função é responsável por estabelecer conexão ODBC a partir da chave de conexão fornecida. 
 
     Parameters
@@ -45,17 +54,17 @@ def get_odbc_connection(cnx_str,attempts=5,time_sleep=10):
     for i in range(1,attempts):
         try:
             cnx_odbc = pyodbc.connect(cnx_str)
-            print(f'Conexão estabelecida com sucesso')
+            logger.info(f'Conexão estabelecida com sucesso')
             return cnx_odbc
 
         except Exception as e:
-            print(f'Falha na tentativa {i} de conexão ODBC')
+            logger.warning(f'Falha na tentativa {i} de conexão ODBC')
             time.sleep(time_sleep)
             if i == 5:
-                print('Não foi possível obter a conexão ODBC',exc_info=True)
-                raise Exception(f'Não foi possível obter a conexão ODBC')
-
-def get_query(tini, tfim): 
+                logger.critical('Não foi possível obter a conexão ODBC',exc_info=True)
+                raise Exception(f'Não foi possível obter a conexão ODBC {type(e)} , {e.args}')
+    
+def get_query(tini, tfim):
     """Essa função é responsável por construir a query com clausula where filtrando datas entre tini e tfim
 
     Parameters
@@ -69,14 +78,13 @@ def get_query(tini, tfim):
     -------
     str
         Query com fitro de data
-    """   
-    # Carrega Query
-    with open('../query_odbc.txt','r') as f:
+    """
+    with open("../query_odbc.txt", "r") as f:
         query = f.read()
-    query+= f"WHERE [data] >='{tini}' and [data] <='{tfim}'"    
-    return query      
+    query+= f"WHERE [data] >='{tini}' and [data] <='{tfim}'"   
+    return query
 
-def get_data(query,cnx_odbc):
+def get_data(query,cnx):
     """Essa função executa a extração dos dados
 
     Parameters
@@ -91,8 +99,11 @@ def get_data(query,cnx_odbc):
     Object
         Pandas DataFrame object
     """
-    df = pd.read_sql(query, cnx_odbc)
-    return df
+    try:
+        df = pd.read_sql(query, cnx)
+        return df
+    except Exception as e:
+        logger.critical(f"Erro na extração dos dados",exc_info=True)
 
 def check_data(df):
     """Essa função checa a qualidade dos dados

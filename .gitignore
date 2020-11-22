@@ -1,5 +1,6 @@
 *__pycache__/
 *.vscode/
 *env/
+*.log
 cnx_str.txt
 query_odbc.txt
