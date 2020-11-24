@@ -51,7 +51,7 @@ def get_odbc_connection(cnx_str,attempts=6,time_sleep=30):
         [description]
     """
 
-    for i in range(1,attempts):
+    for i in range(1,attempts+1):
         try:
             cnx_odbc = pyodbc.connect(cnx_str)
             logger.info(f'Conexão estabelecida com sucesso')
@@ -60,7 +60,7 @@ def get_odbc_connection(cnx_str,attempts=6,time_sleep=30):
         except Exception as e:
             logger.warning(f'Falha na tentativa {i} de conexão ODBC')
             time.sleep(time_sleep)
-            if i == 5:
+            if i == attempts:
                 logger.critical('Não foi possível obter a conexão ODBC',exc_info=True)
                 raise Exception(f'Não foi possível obter a conexão ODBC {type(e)} , {e.args}')
     
