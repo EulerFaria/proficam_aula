@@ -1,6 +1,11 @@
 *__pycache__/
 *.vscode/
 *env/
+*data/
+*ipynb_checkpoints
 *.log
+*.sav
+*.csv
+*.png
 cnx_str.txt
 query_odbc.txt
